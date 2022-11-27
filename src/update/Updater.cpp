@@ -165,6 +165,9 @@ void Updater::update(bool spontaneous) {
     QString link = kLinkFmt.arg(platformArg, "", extension);
 #else
 	if (platform == "macos") {
+#if defined(Q_PROCESSOR_ARM)
+    platformArg = "-arm64";
+#endif
 	  extension = "dmg";
 	} else if (platform.startsWith("win")) {
 	  platformArg = QString("-%1").arg(platform);

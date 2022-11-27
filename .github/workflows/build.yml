@@ -131,7 +131,17 @@ jobs:
             ninja_platform: mac
             qt_platform: mac
             openssl_arch: darwin64-x86_64-cc
-            cmake_env: {}
+            cmake_env:
+              CMAKE_OSX_ARCHITECTURES: "x86_64"
+            pack: 1
+
+          - name: macos-arm64
+            os: macos-latest
+            ninja_platform: mac
+            qt_platform: mac
+            openssl_arch: darwin64-arm64-cc
+            cmake_env:
+              CMAKE_OSX_ARCHITECTURES: "arm64"
             pack: 1
 
           - name: win64
@@ -194,7 +204,7 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v2.13.0
         timeout-minutes: 10
-        if: "!matrix.qt.check_only"
+        if: "!matrix.qt.check_only && matrix.env.qt_platform != 'mac'"
         with:
           version: ${{ matrix.qt.version }}
           target: desktop
@@ -206,7 +216,7 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v2.13.0
         timeout-minutes: 10
-        if: matrix.qt.check_only
+        if: matrix.qt.check_only && matrix.env.qt_platform != 'mac'
         with:
           version: ${{ matrix.qt.version }}
           target: desktop
@@ -214,6 +224,12 @@ jobs:
           arch: ${{ matrix.env.qt_arch_check_only }}
           install-deps: true
           modules: qtwebengine
+
+      - name: Install Qt (macOS)
+        if: matrix.env.qt_platform == 'mac'
+        run: |
+          NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          brew install qt@5
 
       - name: Install Ninja
         uses: seanmiddleditch/gha-setup-ninja@v3
@@ -360,6 +376,7 @@ jobs:
             **/artifacts/Gittyup win64/Gittyup*.exe
             **/artifacts/Gittyup win32/Gittyup*.exe
             **/artifacts/Gittyup macos/Gittyup*.dmg
+            **/artifacts/Gittyup macos-arm64/Gittyup*.dmg
             **/artifacts/Gittyup Flatpak/com.github.Murmele.Gittyup.yml
             **/Gittyup-x86_64/*.flatpak
 
@@ -375,6 +392,7 @@ jobs:
             **/artifacts/Gittyup win64/Gittyup*.exe
             **/artifacts/Gittyup win32/Gittyup*.exe
             **/artifacts/Gittyup macos/Gittyup*.dmg
+            **/artifacts/Gittyup macos-arm64/Gittyup*.dmg
             **/artifacts/Gittyup Flatpak/com.github.Murmele.Gittyup.yml
             **/Gittyup-x86_64/*.flatpak
 
